@@ -4,7 +4,8 @@ import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // import App from '../final/02'
 // import App from '../exercise/02'
-import App from '../exercise/02-01'
+// import App from '../exercise/02-01'
+import App from '../exercise/02-02'
 
 beforeEach(() => {
   jest.spyOn(window, 'fetch')
