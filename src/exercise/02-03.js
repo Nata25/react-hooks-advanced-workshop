@@ -34,16 +34,26 @@ function useAsync (action) {
     ...action
   })
 
+  const isAlive = React.useRef(false)
+
+  React.useEffect(() => {
+    isAlive.current = true
+    return () => isAlive.current = false
+  }, [])
+
+  function safeDispatch (...args) {
+    if (isAlive.current) dispatch (...args)
+  }
+
   const run = React.useCallback((asyncCallback) => {
     if (!asyncCallback) return
-
-    dispatch({type: 'pending'})
+    safeDispatch({type: 'pending'})
     asyncCallback.then(
       data => {
-        dispatch({type: 'resolved', data})
+        safeDispatch({type: 'resolved', data})
       },
       error => {
-        dispatch({type: 'rejected', error})
+        safeDispatch({type: 'rejected', error})
       },
     )
   }, [])
@@ -55,7 +65,9 @@ function useAsync (action) {
 }
 
 function PokemonInfo({pokemonName}) {
-  const {data, status, error, run} = useAsync({
+  // const isComponentAlive = React.useRef(true)
+
+  const {data, status, error, run } = useAsync({
     status: pokemonName ? 'pending' : 'idle',
   })
   
@@ -64,6 +76,11 @@ function PokemonInfo({pokemonName}) {
       return
     }
     run(fetchPokemon(pokemonName))
+    // return () => {
+    //   console.log('unmount')
+    //   // isComponentAlive.current = false
+    //   cancel()
+    // }
   }, [pokemonName, run])
 
   if (status === 'idle' || !pokemonName) {
