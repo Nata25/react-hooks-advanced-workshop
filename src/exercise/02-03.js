@@ -27,13 +27,7 @@ function asyncReducer(state, action) {
   }
 }
 
-function useAsync (action) {
-  const [state, dispatch] = React.useReducer(asyncReducer, {
-    data: null,
-    error: null,
-    ...action
-  })
-
+function useSafeDispatch (dispatch) {
   const isAlive = React.useRef(false)
 
   React.useEffect(() => {
@@ -41,13 +35,27 @@ function useAsync (action) {
     return () => isAlive.current = false
   }, [])
 
-  function safeDispatch (...args) {
-    if (isAlive.current) dispatch (...args)
-  }
+  return React.useCallback((args) => {
+    console.log('args', args)
+    if (isAlive.current) dispatch(args)
+  }, [dispatch])
+
+}
+
+function useAsync (action) {
+  const [state, dispatch] = React.useReducer(asyncReducer, {
+    data: null,
+    error: null,
+    ...action
+  })
+
+  const safeDispatch = useSafeDispatch(dispatch)
 
   const run = React.useCallback((asyncCallback) => {
     if (!asyncCallback) return
+
     safeDispatch({type: 'pending'})
+
     asyncCallback.then(
       data => {
         safeDispatch({type: 'resolved', data})
@@ -56,7 +64,7 @@ function useAsync (action) {
         safeDispatch({type: 'rejected', error})
       },
     )
-  }, [])
+  }, [safeDispatch])
 
   return {
     ...state,
