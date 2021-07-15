@@ -40,6 +40,11 @@ function useAsync (asyncCallback, action, deps) {
     ...action
   })
 
+  const formatUseAsyncHook = ({ status, error }) => {
+    return `req status: ${status} | error: ${error}`
+  }
+  React.useDebugValue(state, formatUseAsyncHook)
+
   React.useEffect(() => {
     // fires when dependency (pokemonName in this case) changes
 

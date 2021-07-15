@@ -7,6 +7,7 @@ const CountContext = React.createContext()
 
 function useCount () {
   const context = React.useContext(CountContext)
+  React.useDebugValue(context[0])
   if (!context) {
     throw new Error(`useCount must be used within CountProvider`)
   }
